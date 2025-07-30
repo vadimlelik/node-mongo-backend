@@ -11,7 +11,7 @@ const options = {
     },
     servers: [
       {
-        url: 'http://localhost:3004',
+        url: 'http://94.228.114.203:3004',
       },
     ],
     components: {
