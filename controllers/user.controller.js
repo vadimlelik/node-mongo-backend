@@ -1,4 +1,5 @@
-const User = require('../models/User');
+const db = require('../models');
+const User = db.user;
 
 exports.getAll = async (req, res) => {
   try {
@@ -42,7 +43,7 @@ exports.getAll = async (req, res) => {
     }
 
     const users = await User.find(filter)
-      .populate('profession qualities')
+      // .populate('profession qualities')
       .sort(sortOptions)
       .skip((page - 1) * limit)
       .limit(Number(limit));
@@ -61,9 +62,10 @@ exports.getAll = async (req, res) => {
 };
 
 exports.getById = async (req, res) => {
-  const user = await User.findById(req.params.id).populate(
-    'profession qualities',
-  );
+  const user = await User.findById(req.params.id);
+  // .populate(
+  //   'profession qualities',
+  // );
   res.json(user);
 };
 

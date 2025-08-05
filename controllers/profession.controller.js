@@ -1,4 +1,5 @@
-const Profession = require('../models/Profession');
+const db = require('../models');
+const Profession = db.profession;
 
 // Получить все профессии
 exports.getAll = async (req, res) => {

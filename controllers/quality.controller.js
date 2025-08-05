@@ -1,4 +1,5 @@
-const Quality = require('../models/Quality');
+const db = require('../models');
+const Quality = db.quality;
 
 // Получить все качества
 exports.getAll = async (req, res) => {
