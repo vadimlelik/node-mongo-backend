@@ -91,7 +91,7 @@ async function setInitialData() {
 }
 
 module.exports = function () {
-  mongoose.connect('mongodb://localhost:27017/testdb');
+  mongoose.connect('mongodb://mongo:27017/testdb');
   const db = mongoose.connection;
   db.on(
     'error',
