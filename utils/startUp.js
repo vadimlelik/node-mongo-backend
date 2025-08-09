@@ -94,7 +94,6 @@ module.exports = function () {
   mongoose.connect('mongodb://mongo:27017/testdb', {
     useNewUrlParser: true,
     useUnifiedTopology: true,
-    keepAlive: true,
   });
   const db = mongoose.connection;
   db.on(
