@@ -90,40 +90,19 @@ async function setInitialData() {
   }
 }
 
-module.exports = async function () {
-  try {
-    await mongoose.connect('mongodb://mongo:27017/testdb', {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-      keepAlive: true,
-      socketTimeoutMS: 30000,
-      serverSelectionTimeoutMS: 5000,
-    });
-
+module.exports = function () {
+  mongoose.connect('mongodb://mongo:27017/testdb', {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    keepAlive: true,
+  });
+  const db = mongoose.connection;
+  db.on(
+    'error',
+    console.error.bind(console, `${chalk.red('x')} connection error:`),
+  );
+  db.once('open', function () {
     debug(`MongoDB status: Connected ${chalk.green('✓')}`);
-
-    // ⬇️ Обработка отключения
-    mongoose.connection.on('disconnected', () => {
-      console.error(chalk.red('MongoDB disconnected! Trying to reconnect...'));
-      setTimeout(() => {
-        mongoose
-          .connect('mongodb://mongo:27017/testdb', {
-            useNewUrlParser: true,
-            useUnifiedTopology: true,
-            keepAlive: true,
-            socketTimeoutMS: 30000,
-            serverSelectionTimeoutMS: 5000,
-          })
-          .catch((err) => {
-            console.error(chalk.red('Reconnection failed:'), err.message);
-          });
-      }, 5000);
-    });
-
-    // ⬇️ Инициализация данных
-    await setInitialData();
-  } catch (err) {
-    console.error(`${chalk.red('MongoDB connection failed:')} ${err.message}`);
-    process.exit(1);
-  }
+    setInitialData();
+  });
 };
