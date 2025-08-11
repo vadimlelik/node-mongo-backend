@@ -64,17 +64,13 @@ exports.login = async (req, res) => {
 exports.token = async (req, res) => {
   const { refreshToken } = req.body;
   if (!refreshToken) return res.status(401).json({ error: 'No token' });
-
   try {
     const payload = jwt.verify(refreshToken, process.env.JWT_SECRET);
     const user = await User.findById(payload.id);
-    if (!user || user.refreshToken !== refreshToken) {
-      return res.status(403).json({ error: 'Invalid refresh token' });
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
     }
-
     const newTokens = generateTokens(user._id);
-    user.refreshToken = newTokens.refreshToken;
-    await user.save();
 
     res.json(newTokens);
   } catch {

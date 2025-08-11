@@ -8,7 +8,6 @@ const professionsMock = require('../mockData/profession.json');
 const qualitiesMock = require('../mockData/qualities.json');
 const usersMock = require('../mockData/users.json');
 
-// Создаём сущности (профессии, качества) из моков, если их нет в базе
 const generateSimpleEntity = async (data, model) => {
   return Promise.all(
     data.map(async (item) => {
