@@ -7,25 +7,25 @@ const options = {
     info: {
       title: 'User API',
       version: '1.0.0',
-      description: 'Документация API пользователей, профессий и качеств',
+      description: 'Документация API пользователей, профессий и качеств'
     },
     servers: [
       {
-        url: 'http://94.228.114.203:3004',
-      },
+        url: 'http://94.228.114.203:3004'
+      }
     ],
     components: {
       securitySchemes: {
         bearerAuth: {
           type: 'http',
           scheme: 'bearer',
-          bearerFormat: 'JWT',
-        },
-      },
+          bearerFormat: 'JWT'
+        }
+      }
     },
-    security: [{ bearerAuth: [] }],
+    security: [{ bearerAuth: [] }]
   },
-  apis: ['./routes/*.js'],
+  apis: ['./routes/*.js']
 };
 
 const swaggerDocs = swaggerJsDoc(options);
