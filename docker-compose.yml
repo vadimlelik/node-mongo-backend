@@ -22,7 +22,4 @@ services:
       - mongo
     volumes:
       - .:/app
-      - /app/node_modules
-
-volumes:
-  mongo-data:
+    command: sh -c "npm ci && node server.js"
