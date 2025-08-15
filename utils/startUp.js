@@ -21,7 +21,7 @@ const generateSimpleEntity = async (data, model) => {
         return newItem;
       }
       return existing;
-    }),
+    })
   );
 };
 
@@ -32,7 +32,7 @@ async function setInitialData() {
   // 1. Профессии
   const professionsData = await generateSimpleEntity(
     professionsMock,
-    models.profession,
+    models.profession
   );
   if (professionsData) {
     debug(`Professions in DB ${chalk.green('✓')}`);
@@ -43,7 +43,7 @@ async function setInitialData() {
   // 2. Качества
   const qualitiesData = await generateSimpleEntity(
     qualitiesMock,
-    models.quality,
+    models.quality
   );
   if (qualitiesData) {
     debug(`Qualities in DB ${chalk.green('✓')}`);
@@ -56,7 +56,7 @@ async function setInitialData() {
     usersMock.map(async (userData) => {
       try {
         const existingUser = await models.user.findOne({
-          email: userData.email,
+          email: userData.email
         });
         if (existingUser) return existingUser;
 
@@ -79,7 +79,7 @@ async function setInitialData() {
         debug(`Error creating user: ${error.message}`);
         return null;
       }
-    }),
+    })
   );
 
   if (users) {
@@ -92,12 +92,12 @@ async function setInitialData() {
 module.exports = function () {
   mongoose.connect('mongodb://mongo:27017/testdb', {
     useNewUrlParser: true,
-    useUnifiedTopology: true,
+    useUnifiedTopology: true
   });
   const db = mongoose.connection;
   db.on(
     'error',
-    console.error.bind(console, `${chalk.red('x')} connection error:`),
+    console.error.bind(console, `${chalk.red('x')} connection error:`)
   );
   db.once('open', function () {
     debug(`MongoDB status: Connected ${chalk.green('✓')}`);
