@@ -22,4 +22,6 @@ services:
       - mongo
     volumes:
       - .:/app
-    command: sh -c "npm ci && node server.js"
+      # Keep container's node_modules from being shadowed by bind mount
+      - /app/node_modules
+    # Use CMD from Dockerfile (node server.js). Avoid npm ci at runtime.

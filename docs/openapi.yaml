@@ -1,0 +1,434 @@
+openapi: 3.1.0
+info:
+  title: User API
+  version: 1.0.0
+  description: Документация API пользователей, профессий и качеств
+servers:
+  - url: http://94.228.114.203:3004
+  - url: http://localhost:3004
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    AuthRegisterRequest:
+      type: object
+      required: [name, email, password]
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+    AuthLoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+    User:
+      type: object
+      properties:
+        _id:
+          type: string
+        name:
+          type: string
+        email:
+          type: string
+        profession:
+          type: string
+          description: ObjectId строки
+        qualities:
+          type: array
+          items:
+            type: string
+        rate:
+          type: number
+        completedMeetings:
+          type: number
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    UsersListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
+        total:
+          type: integer
+        page:
+          type: integer
+        totalPages:
+          type: integer
+    Id:
+      type: string
+      description: Mongo ObjectId
+    Profession:
+      type: object
+      properties:
+        _id:
+          $ref: '#/components/schemas/Id'
+        name:
+          type: string
+    Quality:
+      type: object
+      properties:
+        _id:
+          $ref: '#/components/schemas/Id'
+        name:
+          type: string
+        color:
+          type: string
+          description: Bootstrap color (primary, secondary, success, danger, info, dark)
+    TokenPair:
+      type: object
+      properties:
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+    RefreshRequest:
+      type: object
+      required: [refreshToken]
+      properties:
+        refreshToken:
+          type: string
+    CreateUserRequest:
+      type: object
+      required: [name, email, password]
+      properties:
+        name: { type: string }
+        email: { type: string, format: email }
+        password: { type: string, format: password }
+        age: { type: integer }
+        profession: { $ref: '#/components/schemas/Id' }
+        qualities:
+          type: array
+          items: { $ref: '#/components/schemas/Id' }
+    UpdateUserRequest:
+      type: object
+      properties:
+        name: { type: string }
+        email: { type: string, format: email }
+        age: { type: integer }
+        profession: { $ref: '#/components/schemas/Id' }
+        qualities:
+          type: array
+          items: { $ref: '#/components/schemas/Id' }
+    CreateProfessionRequest:
+      type: object
+      required: [name]
+      properties:
+        name: { type: string }
+    UpdateProfessionRequest:
+      type: object
+      properties:
+        name: { type: string }
+    CreateQualityRequest:
+      type: object
+      required: [name, color]
+      properties:
+        name: { type: string }
+        color: { type: string }
+    UpdateQualityRequest:
+      type: object
+      properties:
+        name: { type: string }
+        color: { type: string }
+paths:
+  /api/auth/register:
+    post:
+      tags: [Auth]
+      summary: Регистрация нового пользователя
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthRegisterRequest'
+      responses:
+        '201':
+          description: Успешная регистрация
+  /api/auth/login:
+    post:
+      tags: [Auth]
+      summary: Логин пользователя
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthLoginRequest'
+      responses:
+        '200':
+          description: Успешный вход
+  /api/auth/token:
+    post:
+      tags: [Auth]
+      summary: Обновление accessToken по refreshToken
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshRequest'
+      responses:
+        '200':
+          description: Новая пара токенов
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenPair'
+        '401': { description: Неверный или истекший refreshToken }
+  /api/auth/logout:
+    post:
+      tags: [Auth]
+      summary: Выход пользователя (logout)
+      security:
+        - bearerAuth: []
+      responses:
+        '200': { description: Успешный выход }
+  /api/users:
+    get:
+      tags: [Users]
+      summary: Список пользователей c фильтрами и пагинацией
+      parameters:
+        - in: query
+          name: page
+          schema: { type: integer, default: 1 }
+        - in: query
+          name: limit
+          schema: { type: integer, default: 10 }
+        - in: query
+          name: search
+          schema: { type: string }
+        - in: query
+          name: profession
+          schema: { type: string }
+        - in: query
+          name: qualities
+          description: Список id качеств, через запятую
+          schema: { type: string }
+        - in: query
+          name: minAge
+          schema: { type: integer }
+        - in: query
+          name: maxAge
+          schema: { type: integer }
+        - in: query
+          name: sortBy
+          schema: { type: string, enum: [name, age], default: name }
+        - in: query
+          name: order
+          schema: { type: string, enum: [asc, desc], default: asc }
+      responses:
+        '200':
+          description: Успешный ответ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UsersListResponse'
+    post:
+      tags: [Users]
+      summary: Создать пользователя
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateUserRequest' }
+      responses:
+        '201': { description: Создано }
+        '400': { description: Ошибка валидации }
+  /api/users/{id}:
+    get:
+      tags: [Users]
+      summary: Получить пользователя по ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { $ref: '#/components/schemas/Id' }
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200': { description: Пользователь найден }
+        '404': { description: Не найдено }
+    put:
+      tags: [Users]
+      summary: Обновить пользователя
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { $ref: '#/components/schemas/Id' }
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/UpdateUserRequest' }
+      responses:
+        '200': { description: Обновлено }
+        '404': { description: Не найдено }
+    delete:
+      tags: [Users]
+      summary: Удалить пользователя
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { $ref: '#/components/schemas/Id' }
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200': { description: Удалено }
+        '404': { description: Не найдено }
+  /api/professions:
+    get:
+      tags: [Professions]
+      summary: Получить список профессий
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: Ок
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Profession' }
+    post:
+      tags: [Professions]
+      summary: Создать профессию
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateProfessionRequest' }
+      responses:
+        '201': { description: Создано }
+        '400': { description: Ошибка валидации }
+  /api/professions/{id}:
+    get:
+      tags: [Professions]
+      summary: Получить профессию по ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { $ref: '#/components/schemas/Id' }
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200': { description: Ок }
+        '404': { description: Не найдено }
+    put:
+      tags: [Professions]
+      summary: Обновить профессию
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { $ref: '#/components/schemas/Id' }
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/UpdateProfessionRequest' }
+      responses:
+        '200': { description: Обновлено }
+        '404': { description: Не найдено }
+    delete:
+      tags: [Professions]
+      summary: Удалить профессию
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { $ref: '#/components/schemas/Id' }
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200': { description: Удалено }
+        '404': { description: Не найдено }
+  /api/qualities:
+    get:
+      tags: [Qualities]
+      summary: Получить список качеств
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: Ок
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Quality' }
+    post:
+      tags: [Qualities]
+      summary: Создать качество
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateQualityRequest' }
+      responses:
+        '201': { description: Создано }
+        '400': { description: Ошибка валидации }
+  /api/qualities/{id}:
+    get:
+      tags: [Qualities]
+      summary: Получить качество по ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { $ref: '#/components/schemas/Id' }
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200': { description: Ок }
+        '404': { description: Не найдено }
+    put:
+      tags: [Qualities]
+      summary: Обновить качество
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { $ref: '#/components/schemas/Id' }
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/UpdateQualityRequest' }
+      responses:
+        '200': { description: Обновлено }
+        '404': { description: Не найдено }
+    delete:
+      tags: [Qualities]
+      summary: Удалить качество
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { $ref: '#/components/schemas/Id' }
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200': { description: Удалено }
+        '404': { description: Не найдено }
+security:
+  - bearerAuth: []

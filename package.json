@@ -14,11 +14,16 @@
     "morgan": "^1.10.1",
     "nodemon": "^3.1.10",
     "swagger-jsdoc": "^6.2.8",
-    "swagger-ui-express": "^5.0.1"
+    "swagger-ui-express": "^5.0.1",
+    "yamljs": "^0.3.0"
   },
   "scripts": {
     "dev": "nodemon server.js",
-    "start": "node server.js"
+    "start": "node server.js",
+    "gen:types": "openapi-typescript docs/openapi.yaml -o src/types/openapi.d.ts"
+  },
+  "devDependencies": {
+    "openapi-typescript": "^7.5.2"
   },
   "keywords": [],
   "author": "",

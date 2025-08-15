@@ -1,35 +1,10 @@
-const swaggerJsDoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
+const path = require('path');
+const YAML = require('yamljs');
 
-const options = {
-  definition: {
-    openapi: '3.0.0',
-    info: {
-      title: 'User API',
-      version: '1.0.0',
-      description: 'Документация API пользователей, профессий и качеств'
-    },
-    servers: [
-      {
-        url: 'http://94.228.114.203:3004'
-      }
-    ],
-    components: {
-      securitySchemes: {
-        bearerAuth: {
-          type: 'http',
-          scheme: 'bearer',
-          bearerFormat: 'JWT'
-        }
-      }
-    },
-    security: [{ bearerAuth: [] }]
-  },
-  apis: ['./routes/*.js']
-};
-
-const swaggerDocs = swaggerJsDoc(options);
+// Load central OpenAPI spec from YAML
+const swaggerDocument = YAML.load(path.join(__dirname, 'docs/openapi.yaml'));
 
 module.exports = function (app) {
-  app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
+  app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 };
