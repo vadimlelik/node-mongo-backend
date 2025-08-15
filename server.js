@@ -21,6 +21,8 @@ app.use('/api/auth', require('./routes/auth.routes'));
 app.use('/api/users', require('./routes/user.routes'));
 app.use('/api/qualities', require('./routes/quality.routes'));
 app.use('/api/professions', require('./routes/profession.routes'));
+// Comments routes mounted at /api to expose /api/users/:userId/comments and /api/comments/:id
+app.use('/api', require('./routes/comment.routes'));
 
 const PORT = process.env.PORT || 3004;
 app.listen(PORT, () => {

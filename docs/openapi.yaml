@@ -149,6 +149,20 @@ components:
       properties:
         name: { type: string }
         color: { type: string }
+    Comment:
+      type: object
+      properties:
+        _id: { $ref: '#/components/schemas/Id' }
+        pageId: { $ref: '#/components/schemas/Id' }
+        userId: { $ref: '#/components/schemas/Id' }
+        content: { type: string }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    CreateCommentRequest:
+      type: object
+      required: [content]
+      properties:
+        content: { type: string }
 paths:
   /api/auth/register:
     post:
@@ -430,5 +444,55 @@ paths:
       responses:
         '200': { description: Удалено }
         '404': { description: Не найдено }
-security:
-  - bearerAuth: []
+  /api/users/{userId}/comments:
+    get:
+      tags: [Comments]
+      summary: Список комментариев для пользователя
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema: { $ref: '#/components/schemas/Id' }
+      responses:
+        '200':
+          description: Ок
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Comment' }
+    post:
+      tags: [Comments]
+      summary: Добавить комментарий к пользователю
+      security: [ { bearerAuth: [] } ]
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema: { $ref: '#/components/schemas/Id' }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateCommentRequest' }
+      responses:
+        '201':
+          description: Создано
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Comment' }
+        '400': { description: Ошибка валидации }
+  /api/comments/{id}:
+    delete:
+      tags: [Comments]
+      summary: Удалить комментарий (автор или администратор)
+      security: [ { bearerAuth: [] } ]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { $ref: '#/components/schemas/Id' }
+      responses:
+        '200': { description: Удалено }
+        '403': { description: Нет прав }
+        '404': { description: Не найдено }
